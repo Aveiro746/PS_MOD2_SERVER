@@ -11,4 +11,4 @@ const blogSchema = new mongoose.Schema({
     private : {type: Boolean , required: true}
 })
 
-module.exports
+module.exports = mongoose.model('Blog' , blogSchema)
