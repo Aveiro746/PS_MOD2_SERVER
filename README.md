@@ -34,7 +34,7 @@ Install packages :
 /blog/:id.delete - finds and deletes blogs by their id
 
 # Schemas 
--Blog Schema
+- Blog Schema
         - created_by: string, required
         - created_at: date, required
         - blog_title: string, required

@@ -11,7 +11,7 @@ const authRouter = require('./routes/authRouter')
 const blogRouter = require('./routes/blogRouter')
 
 const app = express()
-const port = 1111 || process.env.PORT
+const port = process.env.PORT || 1111
 
 app.use(helmet())
 app.use(bodyParser.json())
