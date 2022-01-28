@@ -4,6 +4,17 @@ const Blog = require('../Schemas/BlogSchema')
 const blogRouter = express.Router()
 const jwt = ('jsonwebtoken')
 
+blogRouter.get('/' , verifyJWT, (req , res)=>{
+
+    Blog.find({private: false} ,(err, blogs)=>{
+        if(err){
+         return   res.status(400).json({message: err.message})
+        }
+        res.status(200).json({message:blogs})
+    })
+})
+
+
 blogRouter.get('/:username' , verifyJWT, (req , res)=>{
     let username = req.params.username
 
