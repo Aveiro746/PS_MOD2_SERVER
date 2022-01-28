@@ -1,10 +1,11 @@
 const bcrypt = require('bcrypt')
 const express = require ('express')
 const User = require('../Schemas/UserSchema')
-const jwt = require('../middleware/jwt')
+const {verifyJWT} = require('../middleware/jwt')
+const jwt = require('jsonwebtoken')
 const authRouter = express.Router()
 
-authRouter.get('/' , jwt.authenticateToken, (req , res)=>{
+authRouter.get('/' , verifyJWT, (req , res)=>{
     User.find((error, result)=>{
         if(error){
             res.status(404).json({message: error.message})
@@ -22,13 +23,13 @@ authRouter.post('/login' , async (req , res)=>{
     let username = req.body.username
     let password = req.body.password
 
-    User.findOne({username: username} , (err , retUser)=>{
+    User.findOne({username: username} , (err , result)=>{
        if(err){
            res.status(404).json({message: err.message})
        }
-   })
+   
 
-        bcrypt.compare(password, retUser.password, (err , result)=>{
+        bcrypt.compare(password, result.password, (err , result)=>{
             if(err){
                 res.status(400).json({message: err.message})
             }
@@ -36,9 +37,10 @@ authRouter.post('/login' , async (req , res)=>{
             if(result === false){
                 res.status(403).json({message: "You must be logged in"})
             }
-            let token = jwt.generateAccessToken(retUser.username)
+            let token = jwt.sign(username , process.env.JWT_SECRET)
             res.setHeader('Authorization' , token)
-            res.status(200).json({message: retUser})
+            res.status(200).json({message: result})
+        })
    })
 })
 
@@ -47,14 +49,17 @@ authRouter.post('/login' , async (req , res)=>{
 authRouter.post('/register' , async (req ,res)=>{
     let user = req.body
     let password = req.body.password
+    let username = req.body.username
     let salt = Number(process.env.SALT)
     let hashedPassword = await bcrypt.hash(password , salt)
         user.password = hashedPassword
 
-    User.create(user, (err, newUser)=>{
+       await User.create(user, (err, newUser)=>{
         if(err){
             res.status(404).json({message: err.message})
         }
+        let token = jwt.sign(username , process.env.JWT_SECRET)
+            res.setHeader('Authorization' , token)
         res.status(200).json({user:newUser})
     })
 })
